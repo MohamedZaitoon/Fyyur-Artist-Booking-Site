@@ -44,7 +44,7 @@ class Venue(db.Model):
     facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    shows = db.relationship('Show', backref='venue', lazy=True)
+    shows = db.relationship('Show', backref='venue', lazy=True, cascade="save-update, delete")
     genres = db.Column(db.String(120))
 
 class Artist(db.Model):
@@ -60,7 +60,7 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    shows = db.relationship('Show', backref='artist', lazy=True)
+    shows = db.relationship('Show', backref='artist', lazy=True, cascade="save-update, delete")
 
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -180,7 +180,7 @@ def show_venue(venue_id):
   data = {
       "id": venue.id,
     "name": venue.name,
-    "genres": venue.genres.split(',') if venue.genres != None else "",
+    "genres": venue.genres.split(','),
     "address": venue.address,
     "city": venue.city,
     "state": venue.state,
@@ -410,7 +410,7 @@ def edit_venue_submission(venue_id):
 
   if venue == None:
     return not_found_error(404)
-    
+
   old_name = venue.name;
   venue.name = request.form['name']
   venue.genres = ",".join(request.form.getlist('genres'))

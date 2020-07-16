@@ -156,9 +156,12 @@ def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
   venue = Venue.query.get(venue_id)
+
+  if venue == None:
+    return not_found_error(404)
+
   artists_shows = db.session.query(Artist).join(Show).filter(Show.venue_id == venue.id)\
     .with_entities(Artist.id,Artist.name, Artist.image_link, Show.date_time).all()
-  print(artists_shows)
 
   upcoming_shows =[]
   past_shows = []
@@ -237,6 +240,10 @@ def delete_venue(venue_id):
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
   try:
     v = Venue.query.get(venue_id)
+
+    if v == None:
+      return not_found_error(404)
+
     old_name = v.name
     db.session.delete(v)
     flash('Venue ' + old_name + ' was successfully deleted!')
@@ -282,9 +289,12 @@ def show_artist(artist_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
   artist = Artist.query.get(artist_id)
+
+  if artist == None:
+    return not_found_error(404)
+
   venue_shows = db.session.query(Venue).join(Show).filter(Show.artist_id == artist.id)\
     .with_entities(Venue.id,Venue.name, Venue.image_link, Show.date_time).all()
-  print(f'number of shows = {len(venue_shows)}')
   upcoming_shows =[]
   past_shows = []
   for v in venue_shows:
@@ -324,6 +334,9 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
   form = ArtistForm()
   artist_data = Artist.query.get(artist_id)
+  if artist_data == None:
+    return not_found_error(404)
+
   artist={
     "id": artist_data.id,
     "name": artist_data.name,
@@ -344,6 +357,11 @@ def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
   artist = Artist.query.get(artist_id)
+
+  if artist == None:
+    return not_found_error(404)
+
+  
   old_name = artist.name;
   artist.name = request.form['name']
   artist.genres = ",".join(request.form.getlist('genres'))
@@ -366,6 +384,10 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
   form = VenueForm()
   venue_data = Venue.query.get(venue_id)
+
+  if venue_data == None:
+    return not_found_error(404)
+
   venue={
     "id": venue_data.id,
     "name": venue_data.name,
@@ -385,6 +407,10 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   venue = Venue.query.get(venue_id)
+
+  if venue == None:
+    return not_found_error(404)
+    
   old_name = venue.name;
   venue.name = request.form['name']
   venue.genres = ",".join(request.form.getlist('genres'))
@@ -416,7 +442,6 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   genres = ",".join(request.form.getlist('genres'))
-  print(genres)
   artist = Artist(name=request.form['name'],
                 city=request.form['city'],
                 state=request.form['state'],
@@ -451,8 +476,6 @@ def shows():
   results = db.session.query(Venue).join(Show, Venue.id == Show.venue_id).join(Artist, Artist.id == Show.artist_id)\
   .with_entities(Venue.id,Venue.name, Artist.id,Artist.name,Artist.image_link, Show.date_time)\
   .order_by(Show.date_time).all()
-  print(results)
-  print(results[0][0])
   data=[{
     "venue_id": res[0],
     "venue_name": res[1],
